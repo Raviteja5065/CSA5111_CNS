@@ -1,4 +1,6 @@
+
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 int gcd(int a, int b)
@@ -9,59 +11,93 @@ int gcd(int a, int b)
         b = a % b;
         a = temp;
     }
-
     return a;
 }
 
-int main()
+int mod26(int x)
 {
-    char plaintext[100];
-    char ciphertext[100];
+    return ((x % 26) + 26) % 26;
+}
 
-    int a, b;
-    int i, p, c;
+int modInverse(int a)
+{
+    int i;
 
-    printf("Enter the plaintext: ");
-    fgets(plaintext, sizeof(plaintext), stdin);
+    for (i = 1; i < 26; i++)
+        if ((a * i) % 26 == 1)
+            return i;
 
-    printf("Enter the value of a: ");
-    scanf("%d", &a);
+    return -1;
+}
 
-    printf("Enter the value of b: ");
-    scanf("%d", &b);
+void affineCipher(char text[], int a, int b, int decrypt)
+{
+    int i, p, c, inverse = -1;
 
-    /* Check whether a is valid */
+    if (decrypt)
+        inverse = modInverse(a);
+
+    for (i = 0; text[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)text[i]))
+        {
+            int base = isupper((unsigned char)text[i]) ? 'A' : 'a';
+            p = text[i] - base;
+
+            if (!decrypt)
+                c = mod26(a * p + b);
+            else
+                c = mod26(inverse * (p - b));
+
+            text[i] = (char)(base + c);
+        }
+    }
+}
+
+int main(void)
+{
+    char text[1000];
+    int a, b, choice;
+
+    printf("Enter the text: ");
+    if (fgets(text, sizeof(text), stdin) == NULL)
+        return 1;
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Enter value of a: ");
+    if (scanf("%d", &a) != 1)
+    {
+        printf("Invalid input.\n");
+        return 1;
+    }
+
+    a = mod26(a);
+
     if (gcd(a, 26) != 1)
     {
-        printf("Invalid value of a.\n");
-        printf("a must be relatively prime to 26.\n");
-
-        return 0;
+        printf("Invalid a: gcd(a, 26) must equal 1.\n");
+        printf("Allowed values: 1, 3, 5, 7, 9, 11, ");
+        printf("15, 17, 19, 21, 23, 25.\n");
+        return 1;
     }
 
-    for (i = 0; plaintext[i] != '\0'; i++)
+    printf("Enter value of b: ");
+    if (scanf("%d", &b) != 1)
     {
-        if (isupper(plaintext[i]))
-        {
-            p = plaintext[i] - 'A';
-            c = (a * p + b) % 26;
-            ciphertext[i] = c + 'A';
-        }
-        else if (islower(plaintext[i]))
-        {
-            p = plaintext[i] - 'a';
-            c = (a * p + b) % 26;
-            ciphertext[i] = c + 'a';
-        }
-        else
-        {
-            ciphertext[i] = plaintext[i];
-        }
+        printf("Invalid input.\n");
+        return 1;
+    }
+    b = mod26(b);
+
+    printf("1. Encrypt\n2. Decrypt\nEnter choice: ");
+    if (scanf("%d", &choice) != 1 || (choice != 1 && choice != 2))
+    {
+        printf("Invalid choice.\n");
+        return 1;
     }
 
-    ciphertext[i] = '\0';
+    affineCipher(text, a, b, choice == 2);
 
-    printf("Ciphertext: %s", ciphertext);
-
+    printf("Result: %s\n", text);
     return 0;
 }

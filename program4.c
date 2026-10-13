@@ -1,45 +1,55 @@
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
+#include <ctype.h>
 
-int main()
+int main(void)
 {
-    char plaintext[100];
-    char key[100];
-    char ciphertext[100];
+    char text[1000], key[200];
+    int choice, i, j = 0, shift;
 
-    int i, j = 0;
-    int keyLength;
+    printf("Enter the text: ");
+    if (fgets(text, sizeof(text), stdin) == NULL)
+        return 1;
+    text[strcspn(text, "\n")] = '\0';
 
-    printf("Enter the plaintext: ");
-    fgets(plaintext, sizeof(plaintext), stdin);
+    printf("Enter alphabetic key: ");
+    if (scanf("%199s", key) != 1)
+        return 1;
 
-    printf("Enter the key: ");
-    scanf("%s", key);
-
-    keyLength = strlen(key);
-
-    for (i = 0; plaintext[i] != '\0'; i++)
+    for (i = 0; key[i] != '\0'; i++)
     {
-        if (isalpha(plaintext[i]))
+        if (!isalpha((unsigned char)key[i]))
         {
-            char p = toupper(plaintext[i]);
-            char k = toupper(key[j % keyLength]);
+            printf("Invalid key. Use letters only.\n");
+            return 1;
+        }
+        key[i] = (char)toupper((unsigned char)key[i]);
+    }
 
-            ciphertext[i] =
-                ((p - 'A') + (k - 'A')) % 26 + 'A';
+    printf("1. Encrypt\n2. Decrypt\nEnter choice: ");
+    if (scanf("%d", &choice) != 1 || (choice != 1 && choice != 2))
+    {
+        printf("Invalid choice.\n");
+        return 1;
+    }
+
+    for (i = 0; text[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)text[i]))
+        {
+            int base = isupper((unsigned char)text[i]) ? 'A' : 'a';
+
+            shift = key[j % strlen(key)] - 'A';
+
+            if (choice == 1)
+                text[i] = (char)(base + (text[i] - base + shift) % 26);
+            else
+                text[i] = (char)(base + (text[i] - base - shift + 26) % 26);
 
             j++;
         }
-        else
-        {
-            ciphertext[i] = plaintext[i];
-        }
     }
 
-    ciphertext[i] = '\0';
-
-    printf("Ciphertext: %s", ciphertext);
-
+    printf("Result: %s\n", text);
     return 0;
 }

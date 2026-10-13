@@ -1,41 +1,85 @@
+
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
+#include <ctype.h>
 
-int main()
+int validKey(const char key[])
 {
-    char plaintext[100];
-    char key[27];
-    char ciphertext[100];
-    int i, index;
+    int seen[26] = {0};
+    int i;
 
-    printf("Enter the plaintext: ");
-    fgets(plaintext, sizeof(plaintext), stdin);
+    if (strlen(key) != 26)
+        return 0;
 
-    printf("Enter the 26-letter substitution key: ");
-    scanf("%26s", key);
-
-    for (i = 0; plaintext[i] != '\0'; i++)
+    for (i = 0; i < 26; i++)
     {
-        if (isupper(plaintext[i]))
+        if (!isalpha((unsigned char)key[i]))
+            return 0;
+
+        int x = toupper((unsigned char)key[i]) - 'A';
+        if (seen[x])
+            return 0;
+
+        seen[x] = 1;
+    }
+    return 1;
+}
+
+void substitute(char text[], const char key[], int decrypt)
+{
+    int i;
+
+    for (i = 0; text[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)text[i]))
         {
-            index = plaintext[i] - 'A';
-            ciphertext[i] = toupper(key[index]);
-        }
-        else if (islower(plaintext[i]))
-        {
-            index = plaintext[i] - 'a';
-            ciphertext[i] = tolower(key[index]);
-        }
-        else
-        {
-            ciphertext[i] = plaintext[i];
+            int x = toupper((unsigned char)text[i]) - 'A';
+            int j;
+
+            if (!decrypt)
+                j = toupper((unsigned char)key[x]) - 'A';
+            else
+            {
+                for (j = 0; j < 26; j++)
+                    if (toupper((unsigned char)key[j]) - 'A' == x)
+                        break;
+            }
+
+            text[i] = isupper((unsigned char)text[i])
+                     ? (char)('A' + j)
+                     : (char)('a' + j);
         }
     }
+}
 
-    ciphertext[i] = '\0';
+int main(void)
+{
+    char key[100], text[1000];
+    int choice;
 
-    printf("Ciphertext: %s", ciphertext);
+    printf("Enter 26-letter substitution key: ");
+    if (scanf("%99s", key) != 1 || !validKey(key))
+    {
+        printf("Invalid key. Use each letter A-Z exactly once.\n");
+        return 1;
+    }
 
+    getchar(); /* Consume newline */
+
+    printf("Enter the text: ");
+    if (fgets(text, sizeof(text), stdin) == NULL)
+        return 1;
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("1. Encrypt\n2. Decrypt\nEnter choice: ");
+    if (scanf("%d", &choice) != 1 || (choice != 1 && choice != 2))
+    {
+        printf("Invalid choice.\n");
+        return 1;
+    }
+
+    substitute(text, key, choice == 2);
+
+    printf("Result: %s\n", text);
     return 0;
 }
