@@ -1,0 +1,4 @@
+Question numbers	Topic	                                                                    Result
+21 and 34	        ECB, CBC and CFB modes, including padding	                                Exact duplicate
+37 and 40	        Monoalphabetic substitution frequency attack – top 10 possible plaintexts	Exact duplicate
+14 and 35	        One-Time Pad version of Vigenère cipher	                                    Same core topic

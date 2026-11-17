@@ -1,3 +1,8 @@
 {
-    "c-cpp-compile-run.c-linker-flags": "-lcrypto -lm"
+    "c-cpp-compile-run.c-linker-flags": "-lcrypto -lm",
+    "code-runner.runInTerminal": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.executorMap": {
+        "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt -lcrypto -lm && ./$fileNameWithoutExt"
+    }
 }
